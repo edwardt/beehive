@@ -42,8 +42,8 @@ start_link() ->
     ?LOG(debug, "Added event handler: ~p", [H]),
     try
       add_handler(H)
-    catch X:Reason ->
-      erlang:display({error, {event_manager, {error, X, Reason}}}),
+    catch Class:Reason ->
+      erlang:display({error, {event_manager, {error, Class, Reason}}}),
       ok
     end
   end, Handlers),

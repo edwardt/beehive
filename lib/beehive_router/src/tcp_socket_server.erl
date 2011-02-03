@@ -70,7 +70,7 @@ accept(LSock) ->
 %% Take the socket and decode the routing key from the packet. For
 %% http, this means accept enough on the request to pull off the
 %% headers and decode the 'Host' parameter (or other routing parameter
-%% defined by routing_parameter tphen starting a proxy handler proxy
+%% defined by routing_parameter then starting a proxy handler proxy
 %% process and finally passing the socket to the proxy handler process
 pass_on_to_proxy(ClientSock) ->
   %% Chose here the type of response... for now, it'll just be http,

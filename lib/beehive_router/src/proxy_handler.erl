@@ -150,12 +150,12 @@ proxy_loop(#state{client_socket = CSock, server_socket = SSock,
     _Else -> proxy_loop(State)
   %% If there is no activity for a while and the socket has not already
   %% closed, we'll assume that the connection is tired and should
-  %% close, so we'll close it
+  %% close.
   after 3000 ->
     terminate(normal, State)
   end.
 
-%% Close the engage_bee client socket, but send client data first
+%% Send client data before closing sockets
 send_and_terminate(ClientSock, Reason, Data) ->
   gen_tcp:send(ClientSock, Data),
   gen_tcp:close(ClientSock),

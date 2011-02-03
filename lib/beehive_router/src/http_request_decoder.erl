@@ -28,11 +28,14 @@ handle_request(ClientSock) ->
   Req = beehive_request:new(ClientSock),
   RoutingParameter =
     misc_utils:to_atom(
-      config:search_for_application_value(routing_parameter, 'Host')),
+      beehive_router_config:get_value(routing_parameter, 'Host')
+   %   config:search_for_application_value(routing_parameter, 'Host')
+      ),
   case RoutingParameter of
     'Host' ->
       HeaderVal = mochiweb_headers:get_value(RoutingParameter, Req:get(headers)),
-      BaseDomain = config:search_for_application_value(domain, undefined),
+      %BaseDomain = config:search_for_application_value(domain, undefined),
+      BaseDomain = beehive_router_config:get_value(domain, undefined),
       Subdomain = parse_route_from_request(HeaderVal, BaseDomain),
       ForwardReq = build_request_headers(Req);
     subdirectory ->
