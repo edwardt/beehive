@@ -104,7 +104,7 @@ init([DbAdapterName, Nodes]) ->
   DbAdapter =
     erlang:list_to_atom(lists:flatten(["db_", DbAdapterName, "_adapter"])),
     
-  error_logger:info_msg("Initializing DB Type `p ~n",[DbAdapter]),   
+  error_logger:info_msg("Initializing DB Type ~p ~n",[DbAdapter]),   
     
   Result = init_adapter([node()|Nodes], DbAdapter),
 
@@ -217,3 +217,14 @@ init_adapter(Nodes, DbAdapter) ->
   error_logger:info_msg("Initialization of DB Status: ~p ~n",[Result1]),
   
   ok.
+  
+try_load_module(Module) when is_atom(Module) ->
+  
+  ok.
+  
+ensure_module_loaded(Module) when is_atom(Module)->
+  ok.
+
+
+
+

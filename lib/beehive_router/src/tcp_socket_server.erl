@@ -32,12 +32,12 @@ start_link()          -> init().
 % e.g. BEEHIVE_CLIENT_PORT=80
 init()                ->
   init(config:search_for_application_value(client_port, 8080)).
-init(LocalPort) ->
+init(LocalPort) when is_port(LocalPort)->
   Pid = spawn_link(?MODULE, init_accept, [LocalPort]),
   {ok, Pid}.
 
 % accept responses on the port given by the application configuration
-init_accept(LPort) ->
+init_accept(LPort) when is_port(LPort) ->
   SockOpts = [binary, {backlog, 256}, {nodelay, false},
               {reuseaddr, true},{active, false}],
 	case gen_tcp:listen(LPort, SockOpts) of

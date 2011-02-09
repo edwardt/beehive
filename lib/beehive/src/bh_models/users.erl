@@ -58,7 +58,7 @@ find_by_token(Token) ->
   Result = case ?DB:match(#user{token = Token, _='_'}) of
     [] -> not_found;
     [U|_] -> U;
-    _ -> not_found
+    _Else -> not_found
   end,
   error_logger:info_msg("Find User by token: ~p ~n",[Result]),
   Result

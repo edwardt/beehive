@@ -2,6 +2,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 setup() ->
+  bh_test_util:setup(),
   bh_test_util:dummy_user(),
   rest_server:start_link(),
   timer:sleep(100),

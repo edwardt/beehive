@@ -198,8 +198,8 @@ create_user(NewUser) ->
     case users:find_by_email(NewUser#user.email) of
       not_found ->        
         What = users:create(NewUser),
-        display("User created ~p ~n", [What]);
-      
+        display("User created ~p ~n", [What]),
+        What;
       U1 -> 
         display("User already registered ~p ~n",[U1]),
         {ok, U1}

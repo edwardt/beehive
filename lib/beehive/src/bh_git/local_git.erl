@@ -174,5 +174,7 @@ cmd_receive(Port, Out) ->
       cmd_receive(Port, Out)
     after 500 ->
       % We don't want it to hang infinitely, so if it does, we'll close it off
-      ok
+     ok
   end.
+
+  

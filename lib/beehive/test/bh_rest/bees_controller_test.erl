@@ -3,6 +3,8 @@
 -include ("beehive.hrl").
 
 setup() ->
+  display("Setting storage"),
+  bh_test_util:setup(),
   display("Creating test user ~n"),
   bh_test_util:dummy_user(),                    % test@getbeehive.com
   display("Created dummy user ~n"),
@@ -12,7 +14,7 @@ setup() ->
   ok.
 
 teardown(_X) ->
-  ok.
+   ok.
 
 starting_test_() ->
   {inorder,

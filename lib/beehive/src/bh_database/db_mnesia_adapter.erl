@@ -74,6 +74,7 @@ all(Table) ->
 %%%% INTERNAL
 init_databases() -> init_databases([node(self())]).
 init_databases(Nodes) ->
+  
   error_logger:info_msg("Initializing DB"),
   ok = ensure_dir(),
   error_logger:info_msg("DB folder present"),
@@ -117,7 +118,8 @@ ensure_not_running() ->
 ensure_dir() ->
   case bh_file_utils:ensure_dir_exists([dir()]) of
     {error, Reason} -> throw({error, Reason});
-    ok -> ok
+    ok -> ok;
+    Else -> throw({error})
   end.
   
 ensure_dir_permission()->
@@ -125,7 +127,8 @@ ensure_dir_permission()->
   case bh_file_utils:ensure_dir_permission(Dir,read_write) of
     ok -> ok;
     {error, Reason} -> throw({folder_persmission_error, Reason});
-    {Class, Reason} -> throw({folder_persmission_error, Reason})
+    {Class, Reason} -> throw({folder_persmission_error, Reason});
+    Else -> throw({folder_persmission_error, Else})
   end.
 
 %% Thanks to RabbitMQ for the idea
