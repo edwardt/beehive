@@ -108,7 +108,7 @@ init([DbAdapterName, Nodes]) ->
     
   Result = init_adapter([node()|Nodes], DbAdapter),
 
-  error_logger:info_msg("Initialized DB Adaptor Type `p ~n",[Result]),  
+  error_logger:info_msg("Initialized DB Adaptor Type ~w with Type ~w and name ~w ~n",[Result,DbAdapter, DbAdapterName]),  
    
   {ok, #state{
     adapter = DbAdapter
