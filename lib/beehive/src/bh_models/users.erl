@@ -30,24 +30,39 @@
 -define (DB, beehive_db_srv).
 
 find_by_email(Hostemail) ->
-  case find_all_by_email(Hostemail) of
+  Result =  case find_all_by_email(Hostemail) of
+    [] -> not_found;
     [B|_] -> B;
     _ -> not_found
-  end.
+  end,
+  
+  error_logger:info_msg("Find User by Email: ~p ~n",[Result]),
+  
+  Result
+  .
 
 find_all_by_email(Name) ->
-  case ?DB:read(user, Name) of
+  Result = case ?DB:read(user, Name) of
     Users when is_list(Users) -> Users;
     User  when is_record(User, user) -> [User];
 
     _ -> []
-  end.
+  end,
+  
+  error_logger:info_msg("Find All Users by Email: ~p ~n",[Result]),
+  
+  Result
+  .
 
 find_by_token(Token) ->
-  case ?DB:match(#user{token = Token, _='_'}) of
+  Result = case ?DB:match(#user{token = Token, _='_'}) of
+    [] -> not_found;
     [U|_] -> U;
     _ -> not_found
-  end.
+  end,
+  error_logger:info_msg("Find User by token: ~p ~n",[Result]),
+  Result
+  .
 
 %% Does this user exist?
 exist(Name) ->
@@ -90,12 +105,20 @@ create(Given) ->
     true -> {user, updated, User};
     false -> {user, created, User}
   end,
-  case save(User#user{password = bh_md5:hex(User#user.password)}) of
+  
+  error_logger:info_msg("Get Create User Event: ~w for user: ~w ~n",[EventMsg, User]),
+  
+  Result = case save(User#user{password = bh_md5:hex(User#user.password)}) of
     {ok, _} = T ->
       ?NOTIFY(EventMsg),
       T;
     Else -> Else
-  end.
+  end,
+  
+  error_logger:info_msg("Save User: ~p ~n",[Result]),
+  
+  Result
+  .
 
 update(NewProps) ->
   create(new(NewProps)).

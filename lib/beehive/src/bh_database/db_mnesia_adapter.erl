@@ -74,10 +74,17 @@ all(Table) ->
 %%%% INTERNAL
 init_databases() -> init_databases([node(self())]).
 init_databases(Nodes) ->
+  error_logger:info_msg("Initializing DB"),
   ok = ensure_dir(),
+  error_logger:info_msg("DB folder present"),
+  ok = ensure_dir_permission(),
+  error_logger:info_msg("DB folder permission ok"),
   ok = ensure_running(),
+  error_logger:info_msg("DB is running"),
   ok = add_slave(Nodes),
+  error_logger:info_msg("DB slave nodes added"),
   ok = wait_for_tables(),
+  error_logger:info_msg("DB table loaded"),
   %% Add default data
   ok.
 
@@ -85,9 +92,12 @@ dir() ->
   DefaultDatabaseDir = config:search_for_application_value(database_dir,
                                                            ?BEEHIVE_DIR("db")),
   case application:get_env(mnesia, dir) of
-    {ok, Dir} -> Dir;
+    {ok, Dir} -> 
+       ?LOG(info, "Mnesia DB folder ~p",[Dir]),
+       Dir;
     _Else ->
       application:set_env(mnesia, dir, DefaultDatabaseDir),
+      ?LOG(info, "Mnesia DB folder ~p",[DefaultDatabaseDir]),
       DefaultDatabaseDir
   end.
   %% mnesia:system_info(directory).
@@ -108,6 +118,14 @@ ensure_dir() ->
   case bh_file_utils:ensure_dir_exists([dir()]) of
     {error, Reason} -> throw({error, Reason});
     ok -> ok
+  end.
+  
+ensure_dir_permission()->
+  Dir = dir(),
+  case bh_file_utils:ensure_dir_permission(Dir,read_write) of
+    ok -> ok;
+    {error, Reason} -> throw({folder_persmission_error, Reason});
+    {Class, Reason} -> throw({folder_persmission_error, Reason})
   end.
 
 %% Thanks to RabbitMQ for the idea

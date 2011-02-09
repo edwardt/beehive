@@ -55,6 +55,25 @@ ensure_dir_exists([Dir|Rest]) ->
   filelib:ensure_dir(Dir ++ "/.nonexistant_file"),
   ensure_dir_exists(Rest).
 
+ensure_dir_permission()-> ok.
+ensure_dir_permission(Name, Permission) when is_list(Name) , is_atom(Permission) ->
+  ensure_permission(Name, {directory, Permission}).
+  
+ensure_file_permission()->ok.
+ensure_file_permission(Name, Permission) when is_list(Name), is_atom(Permission) ->
+   ensure_permission(Name, {directory, Permission}).
+   
+ensure_permission(Name, Permission) when is_list(Name) , is_atom(Permission) ->
+  {Type, Attribute0 }  = Permission,
+%  {ok, {file_info, _Size, Type, Attribute1, 
+%        _,_,_,_,
+%        _,_,_,_,_,_,_ }} = file:read_file_info(Name),
+  Result = file:read_file_info(Name),   
+  error_logger:info_msg("file_info ~p ~n",[Result]),   
+ % {directory, Attribute0} = {Type, Attribute1},
+  ok.
+
+
 is_symlink(Path) ->
   case file:read_link_info(Path) of
     {ok, #file_info{type = symlink}} -> true;

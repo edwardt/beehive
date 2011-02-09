@@ -3,8 +3,11 @@
 -include ("beehive.hrl").
 
 setup() ->
+  display("Creating test user ~n"),
   bh_test_util:dummy_user(),                    % test@getbeehive.com
-  rest_server:start_link(),
+  display("Created dummy user ~n"),
+  {ok, Pid} = rest_server:start_link(),
+  display("Started rest server ~p",[Pid]),
   timer:sleep(100),
   ok.
 
@@ -24,8 +27,11 @@ starting_test_() ->
   }.
 
 get_index() ->
-  {ok, _Bee} = bees:create(#bee{app_name = "boxcar", 
+  {ok, Bee} = bees:create(#bee{app_name = "boxcar", 
                                 host="127.0.0.1", port=9001}),
+                                
+  display("Created Bee ~p",[Bee]),
+  
   {ok, Header, Response} =
     bh_test_util:fetch_url(get,
                            [{path, "/bees.json"}]),
@@ -52,3 +58,9 @@ post_create_bee() ->
   ?assertMatch([{"message", "Added bee beetest"}],
                bh_test_util:response_json(Response)),
   passed.
+ 
+display(Message) ->
+  bh_test_util:display(Message).
+  
+display(Format, Msg) ->
+  bh_test_util:display(Format, Msg).

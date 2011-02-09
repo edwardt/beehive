@@ -9,6 +9,8 @@
 -include ("beehive.hrl").
 -include ("common.hrl").
 
+-export([display/1,display/2]).
+
 setup() ->
   setup([]).
 
@@ -18,35 +20,61 @@ setup(Proplist) when is_list(Proplist) ->
     undefined ->
       Dir = filename:dirname(filename:dirname(code:which(?MODULE))),
       ConfigFile = filename:join([Dir, "test", "fixtures", "beehive.cfg"]),
-
+      display("Get test config ~p",[ConfigFile]),
       application:set_env(beehive, node_type,
                           proplists:get_value(node_type, Proplist, test_type)),
+      display("NODE type ~p",[get_app_env(beehive, node_type)]),
+      
       application:set_env(beehive, config_file,
                           proplists:get_value(config_file, Proplist, ConfigFile)),
+      display("Config File ~p",[get_app_env(beehive, config_file)]),
+      
       application:set_env(beehive, home,
                           proplists:get_value(home, Proplist,
                                               "/tmp/beehive/test")),
+      display("Homedir ~p",[get_app_env(beehive, home)]),
       application:set_env(beehive, repository, "local_git"),
 
+      display("Repository ~p",[get_app_env(beehive, repository)]),      
       application:set_env(beehive, database_dir,
                           proplists:get_value(database_dir, Proplist,
                                               "/tmp/beehive/test/test_db")),
+      display("DBDir ~p",[get_app_env(beehive, database_dir)]),
+      
       GlitterConfig = filename:join([Dir, "test", "gitolite-admin",
                                      "conf", "gitolite.conf"]),
       application:set_env(glitter, config_file, GlitterConfig),
-      application:start(sasl),
+      display("Got GLitter environemt config: ~p", [GlitterConfig]),
+      
+      application:start(sasl),      
+      display("SASL started ~n"),
+      
       %% We don't need any error output here.
       beehive:start([{beehive_db_srv, testing}]),
-
-      inets:start();
+      display("Started DB server ~n"),
+      
+      inets:start(),
+      display("Started Inets ~n");
+      
     {ok, _} -> ok
   end;
-
-
 setup(Table) ->
   setup(),
   clear_table(Table),
   ok.
+  
+get_app_env(App, Key) when is_atom(App), is_atom(Key)->
+  {ok, Value} = application:get_env(App, Key),
+  Value.
+
+display(Message) when is_list(Message) ->
+  error_logger:info_msg(Message).
+
+display(Format, Message) when is_list(Format), is_list(Message) ->
+  error_logger:info_msg(Format, Message).
+  
+check_named_proc(Name)-> 
+  whereis(Name).
 
 try_to_fetch_url_or_retry(_Method, _Args, 0) -> failed;
 try_to_fetch_url_or_retry(Method, Args, Times) ->
@@ -165,12 +193,19 @@ admin_user() ->
                    }).
 
 create_user(NewUser) ->
-  {ok, User} =
+  display("Check to see if user exist ~p ~n",[NewUser]),
+  Result =
     case users:find_by_email(NewUser#user.email) of
-      not_found ->
-        users:create(NewUser);
-      U1 -> {ok, U1}
+      not_found ->        
+        What = users:create(NewUser),
+        display("User created ~p ~n", [What]);
+      
+      U1 -> 
+        display("User already registered ~p ~n",[U1]),
+        {ok, U1}
     end,
+  display("Create User Status: ~p ~n",[Result]),
+  {ok, User} = Result,
   User.
 
 %% Utils

@@ -103,8 +103,13 @@ stop() -> gen_server:cast(?SERVER, {stop}).
 init([DbAdapterName, Nodes]) ->
   DbAdapter =
     erlang:list_to_atom(lists:flatten(["db_", DbAdapterName, "_adapter"])),
-  init_adapter([node()|Nodes], DbAdapter),
+    
+  error_logger:info_msg("Initializing DB Type `p ~n",[DbAdapter]),   
+    
+  Result = init_adapter([node()|Nodes], DbAdapter),
 
+  error_logger:info_msg("Initialized DB Adaptor Type `p ~n",[Result]),  
+   
   {ok, #state{
     adapter = DbAdapter
   }}.
@@ -174,7 +179,8 @@ handle_info(Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 %%--------------------------------------------------------------------
-terminate(_Reason, _State) ->
+terminate(Reason, State) ->
+  error_logger:info_msg(io:format("db server terminate with Reason: ~p on State ~p",[Reason, State])),
   ok.
 
 %%--------------------------------------------------------------------
@@ -192,7 +198,7 @@ call_adapter(F, A, State) ->
   apply(State#state.adapter,F,A).
 
 init_adapter(Nodes, DbAdapter) ->
-  case erlang:module_loaded(DbAdapter) of
+  Result = case erlang:module_loaded(DbAdapter) of
     true -> ok;
     false ->
       case code:load_file(DbAdapter) of
@@ -203,5 +209,11 @@ init_adapter(Nodes, DbAdapter) ->
         _ -> ok
       end
   end,
-  apply(DbAdapter, init_databases, [Nodes]),
+  
+  error_logger:info_msg("Loading of DB module: ~p ~n",[Result]),
+  
+  Result1= apply(DbAdapter, init_databases, [Nodes]),
+  
+  error_logger:info_msg("Initialization of DB Status: ~p ~n",[Result1]),
+  
   ok.
