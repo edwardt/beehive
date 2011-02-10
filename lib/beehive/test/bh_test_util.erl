@@ -45,16 +45,24 @@ setup(Proplist) when is_list(Proplist) ->
                                      "conf", "gitolite.conf"]),
       application:set_env(glitter, config_file, GlitterConfig),
       display("Got GLitter environemt config: ~p", [GlitterConfig]),
-      
-      application:start(sasl),      
-      display("SASL started ~n"),
+      Res = ensure_started(sasl), 
+%      application:start(sasl),      
+      display("SASL started ~w ~n",[Res]),
       
       %% We don't need any error output here.
-      beehive:start([{beehive_db_srv, testing}]),
-      display("Started DB server ~n"),
+      Res1 = beehive:start([{beehive_db_srv, testing}]),
+      display("Started DB server ~w ~n", [Res1]),
       
-      inets:start(),
-      display("Started Inets ~n");
+      Res2 = case inets:start() of
+       ok -> {ok, app_started};
+       {ok, _Reason } -> {ok, app_started};
+       {error , {already_started, App}} -> {ok, app_started};
+       {error, Error} -> throw({error_start_app, Error})
+      end,
+      
+      display("Started Inets ~w ~n", [Res2]),
+      
+      Res2;
       
     {ok, _} -> ok
   end;
@@ -62,6 +70,21 @@ setup(Table) ->
   setup(),
   clear_table(Table),
   ok.
+  
+
+ensure_started(App) when is_atom(App) ->
+  case application:start(App) of
+       ok-> {ok, app_started};
+       {error , {already_started, _AppPid}} -> {ok, app_started};
+       {error, Error} -> throw({error_start_app, Error})
+  end. 
+
+ensure_stopped(App) when is_atom(App)->
+  case application:stop(App) of
+ 	ok-> {ok, app_stopped};
+	{error, {not_started, _AppPid}} -> {ok, app_stopped};
+	{error, Error} -> throw({error_stop_app, Error})
+  end.
   
 get_app_env(App, Key) when is_atom(App), is_atom(Key)->
   {ok, Value} = application:get_env(App, Key),

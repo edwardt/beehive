@@ -3,18 +3,23 @@
 -include ("beehive.hrl").
 
 setup() ->
-  display("Setting storage"),
+  display("~w Setting storage",[?MODULE]),
   bh_test_util:setup(),
-  display("Creating test user ~n"),
+  display("~w Creating test user ~n",[?MODULE]),
   bh_test_util:dummy_user(),                    % test@getbeehive.com
-  display("Created dummy user ~n"),
-  {ok, Pid} = rest_server:start_link(),
-  display("Started rest server ~p",[Pid]),
+  display("~w Created dummy user ~n",[?MODULE]),
+  Res = rest_server:start_link(),
+  display("~w Started rest server ~w ~p",[?MODULE, Res]),
   timer:sleep(100),
   ok.
 
 teardown(_X) ->
-   ok.
+  beehive_db_srv:delete_all(user),
+  beehive_db_srv:delete_all(user_app),
+  beehive_db_srv:delete_all(app),
+  beehive_db_srv:stop(),
+  %rest_server:stop(),
+  ok.
 
 starting_test_() ->
   {inorder,
@@ -29,6 +34,7 @@ starting_test_() ->
   }.
 
 get_index() ->
+  display("Beecontroller test Get Index Test"),
   {ok, Bee} = bees:create(#bee{app_name = "boxcar", 
                                 host="127.0.0.1", port=9001}),
                                 
@@ -47,6 +53,7 @@ get_index() ->
   passed.
 
 post_create_bee() ->
+  display("Beecontroller test Post Create Bee Test"),
   {ok, Header, Response} =
     bh_test_util:fetch_url(post,
                            [{path, "/bees.json"},
