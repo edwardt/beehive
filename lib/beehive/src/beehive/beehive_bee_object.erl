@@ -31,7 +31,7 @@
          ]).
 
 
--define (DEBUG, false).
+-define (DEBUG, true).
 -define (DEBUG_PRINT (Args),
          fun() ->
              case ?DEBUG of
@@ -58,6 +58,7 @@
 
 %% Initialize included bee_tpes
 init() ->
+  application:start(crypto),
   beehive_ets_helper:spawn_and_monitor(?BEEHIVE_BEE_OBJECT_INFO_TABLE_PROCESS,
                                        [?BEEHIVE_BEE_OBJECT_INFO_TABLE]),
   %% Ewww
@@ -845,7 +846,8 @@ unique_filename(#bee_object{name = Name} = _BeeObject) ->
 
 %% Get temp_file
 temp_file() ->
-  Filename = test_server:temp_name(atom_to_list(?MODULE)),
+  %Filename = "AreYouKiddingMe" ++ test_server:temp_name(atom_to_list(?MODULE)),
+  Filename = get_unique_name(?MODULE),
   Filepath = filename:join(["/tmp", Filename]),
   {ok, Io} = file:open(Filepath, [write]),
   {ok, Filepath, Io}.
@@ -855,6 +857,24 @@ build_envs(Proplists) ->
                           lists:filter(fun({K, V}) ->
                                            valid_env_prop(K, V)
                                        end, Proplists))).
+
+get_unique_name(Stem)->
+  {A,B,C} = erlang:now(),
+  LowerRange = 0, 
+  UpperRange = A bxor B bxor C,
+  RandomNum = crypto:rand_uniform(LowerRange, UpperRange),
+  
+  error_logger:info_msg("RandomNum ~w",[RandomNum]),
+  
+  RandomName = atom_to_list(Stem) ++ integer_to_list(RandomNum),
+  {ok,Files} = file:list_dir(filename:dirname(Stem)),
+  case lists:member(RandomName,Files) of
+	true ->
+	    get_unique_name(Stem); %% collision, recursively try again
+	false ->
+	    RandomName
+ end.
+
 
 build_env({env, V}) -> build_envs(V);
 build_env({pid, V}) when is_pid(V) -> {"PID", erlang:pid_to_list(V)};

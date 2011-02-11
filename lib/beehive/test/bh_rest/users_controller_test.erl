@@ -13,6 +13,7 @@ teardown(_X) ->
   beehive_db_srv:delete_all(user),
   beehive_db_srv:delete_all(user_app),
   beehive_db_srv:delete_all(app),
+  rest_server:stop(),
   ok.
 
 starting_test_() ->

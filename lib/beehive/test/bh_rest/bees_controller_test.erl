@@ -18,7 +18,7 @@ teardown(_X) ->
   beehive_db_srv:delete_all(user_app),
   beehive_db_srv:delete_all(app),
   beehive_db_srv:stop(),
-  %rest_server:stop(),
+  rest_server:stop(),
   ok.
 
 starting_test_() ->
@@ -32,6 +32,13 @@ starting_test_() ->
     ]
    }
   }.
+  
+ensure_app_start(App) when is_atom(App)->
+ case application:start(App) of
+   ok -> ok;
+   {error, {already_started}} -> ok;
+   {error, OtherError} -> {error, OtherError}
+ end.
 
 get_index() ->
   display("Beecontroller test Get Index Test"),
