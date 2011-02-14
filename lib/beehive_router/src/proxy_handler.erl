@@ -182,6 +182,7 @@ terminate1(Reason, #state{server_socket = SSock, client_socket = CSock,
 
   %% A bee would only not exist if the bee is a 'fake' bee as in one
   %% constructed for the 'base'
+  %% TODO: i don't know why a timedout bee can be a ready bee..
   RealBee = case bees:find_by_id(Bee#bee.id) of
     [] -> Bee;
     RealBee1 -> RealBee1
