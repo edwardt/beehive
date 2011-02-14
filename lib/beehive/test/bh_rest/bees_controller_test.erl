@@ -8,7 +8,8 @@ setup() ->
   display("~w Creating test user ~n",[?MODULE]),
   bh_test_util:dummy_user(),                    % test@getbeehive.com
   display("~w Created dummy user ~n",[?MODULE]),
-  Res = rest_server:start_link(),
+  %Res = rest_server:start_link(),
+  Res = ensure_rest_server_start(),
   display("~w Started rest server ~w ~p",[?MODULE, Res]),
   timer:sleep(100),
   ok.
@@ -34,11 +35,19 @@ starting_test_() ->
   }.
   
 ensure_app_start(App) when is_atom(App)->
- case application:start(App) of
-   ok -> ok;
-   {error, {already_started}} -> ok;
-   {error, OtherError} -> {error, OtherError}
- end.
+  case application:start(App) of
+    ok -> ok;
+    {error, {already_started}} -> ok;
+    {error, OtherError} -> {error, OtherError}
+  end.
+ 
+ensure_rest_server_start()->
+  case  rest_server:start_link() of
+    ok -> ok;
+    {already_started, _Pid} -> ok;
+    {error, {already_started}} -> ok;
+    {error, OtherError} -> {error, OtherError} 
+  end.
 
 get_index() ->
   display("Beecontroller test Get Index Test"),

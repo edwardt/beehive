@@ -31,7 +31,7 @@
          ]).
 
 
--define (DEBUG, true).
+-define (DEBUG, false).
 -define (DEBUG_PRINT (Args),
          fun() ->
              case ?DEBUG of

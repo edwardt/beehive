@@ -4,11 +4,13 @@
 setup() ->
   bh_test_util:setup(),
   bh_test_util:dummy_user(),
-  rest_server:start_link(),
+  %rest_server:start_link(),
+  ensure_rest_server_start(),
   timer:sleep(100),
   ok.
 
 teardown(_X) ->
+  ensure_rest_server_stop(),
   ok.
 
 starting_test_() ->
@@ -24,6 +26,22 @@ starting_test_() ->
     ]
    }
   }.
+
+ensure_rest_server_start()->
+  case  rest_server:start_link() of
+    ok -> ok;
+    {already_started, _Pid} -> ok;
+    {error, {already_started}} -> ok;
+    {error, OtherError} -> {error, OtherError} 
+  end.
+  
+ensure_rest_server_stop()->
+  case rest_server:stop() of
+   ok -> ok;
+   {already_stopped, _Pid} -> ok;
+   {error, {already_stopped}}-> ok;
+   {error, OtherError} -> {error, OtherError}
+  end.
 
 test_post() ->
   {ok, Headers, Body} = post_to_auth([{email, "test@getbeehive.com"},

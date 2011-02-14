@@ -5,7 +5,8 @@
 setup() ->
   bh_test_util:setup(),
   bh_test_util:dummy_user(),                    % test@getbeehive.com
-  rest_server:start_link(),
+  %rest_server:start_link(),
+  ensure_rest_server_start(),
   timer:sleep(100),
   ok.
 
@@ -13,7 +14,8 @@ teardown(_X) ->
   beehive_db_srv:delete_all(user),
   beehive_db_srv:delete_all(user_app),
   beehive_db_srv:delete_all(app),
-  rest_server:stop(),
+  %rest_server:stop(),
+  ensure_rest_server_stop(),
   ok.
 
 starting_test_() ->
@@ -39,6 +41,22 @@ starting_test_() ->
     ]
    }
   }.
+
+ensure_rest_server_start()->
+  case  rest_server:start_link() of
+    ok -> ok;
+    {already_started, _Pid} -> ok;
+    {error, {already_started}} -> ok;
+    {error, OtherError} -> {error, OtherError} 
+  end.
+  
+ensure_rest_server_stop()->
+  case rest_server:stop() of
+   ok -> ok;
+   {already_stopped, _Pid} -> ok;
+   {error, {already_stopped}}-> ok;
+   {error, OtherError} -> {error, OtherError}
+  end.
 
 get_index() ->
   {ok, Header, Response} =

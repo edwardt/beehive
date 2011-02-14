@@ -285,11 +285,28 @@ stop_t() ->
 
 cleanup_t() ->
   bh_test_util:replace_repo_with_fixture("beehive_bee_object_test_app.git"),
-  beehive_bee_object:bundle([{type, rack}|app_proplist()]),
+  Res = beehive_bee_object:bundle([{type, rack}|app_proplist()]),
   Bundle = filename:join([related_dir(), "squashed", "beehive_bee_object_test_app.bee"]),
+  
+  error_logger:info_msg("Bundle Dir ~w with result ~w", [Bundle, Res]),
+  
   ?assert(filelib:is_file(Bundle) =:= true),
-  beehive_bee_object:cleanup("beehive_bee_object_test_app"),
-  ?assert(filelib:is_file(filename:join([related_dir(), "run", "beehive_bee_object_test_app"])) =:= false),
+  
+  Res1 = beehive_bee_object:cleanup("beehive_bee_object_test_app"),
+  
+  error_logger:info_msg("Cleanup Bundle Dir ~w with result ~w", [Bundle, Res1]),
+  
+  FileName = filename:join([related_dir(), "run", "beehive_bee_object_test_app"]),
+  
+  error_logger:info_msg("Check if Bundle Dir ~w  still exists", [FileName]),
+  
+  FileExists = filelib:is_file(FileName),
+  
+  error_logger:info_msg("Check File Exists ~p ", [FileExists]),
+  
+  ?assertEqual(false, FileExists),
+  
+ % ?assert(filelib:is_file(filename:join([related_dir(), "run", "beehive_bee_object_test_app"])) =:= false),
   passed.
 
 send_t() ->
@@ -373,6 +390,7 @@ responding_loop(Acc) ->
 
 related_dir() ->
   {ok, Dir} = application:get_env(beehive, home),
+  error_logger:info_msg("Beehive Home ~p ",[Dir]),
   Dir.
 
 setup_populated_repo(Name) ->
