@@ -63,7 +63,7 @@ ensure_file_permission()->ok.
 ensure_file_permission(Name, Permission) when is_list(Name), is_atom(Permission) ->
    ensure_permission(Name, {directory, Permission}).
    
-ensure_permission(Name, Permission) when is_list(Name) , is_atom(Permission) ->
+ensure_permission(Name, Permission) when is_list(Name) ->
   {Type, Attribute0 }  = Permission,
 %  {ok, {file_info, _Size, Type, Attribute1, 
 %        _,_,_,_,
